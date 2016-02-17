@@ -12,13 +12,17 @@ def escape_item(val, charset, mapping=None):
     if mapping is None:
         mapping = encoders
     encoder = mapping.get(type(val))
-
-    # Fallback to default when no encoder found
     if not encoder:
-        try:
-            encoder = mapping[text_type]
-        except KeyError:
-            raise TypeError("no default type converter defined")
+        if isinstance(val, int):
+            encoder = mapping.get(int)
+        elif isinstance(val, Decimal):
+            encoder = mapping.get(Decimal)
+        else:
+            # Fallback to default when no encoder found
+            try:
+                encoder = mapping[text_type]
+            except KeyError:
+                raise TypeError("no default type converter defined")
 
     if encoder in (escape_dict, escape_sequence):
         val = encoder(val, charset, mapping)
